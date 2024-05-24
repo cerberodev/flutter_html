@@ -10,7 +10,7 @@ When rendering table elements, the package tries to calculate the best fit for e
 
 ```dart
 Widget html = Html(
-  customRenders: {
+  customRender: {
     tableMatcher(): tableRender(),
   }
 );

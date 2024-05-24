@@ -4,22 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/src/css_parser.dart';
 
-//Export Style value-unit APIs
-export 'package:flutter_html/src/style/margin.dart';
-export 'package:flutter_html/src/style/padding.dart';
-export 'package:flutter_html/src/style/length.dart';
-export 'package:flutter_html/src/style/size.dart';
-export 'package:flutter_html/src/style/fontsize.dart';
-export 'package:flutter_html/src/style/lineheight.dart';
-export 'package:flutter_html/src/style/marker.dart';
-
 ///This class represents all the available CSS attributes
 ///for this package.
 class Style {
   /// CSS attribute "`background-color`"
   ///
   /// Inherited: no,
-  /// Default: null (transparent),
+  /// Default: Colors.transparent,
   Color? backgroundColor;
 
   /// CSS attribute "`color`"
@@ -27,18 +18,6 @@ class Style {
   /// Inherited: yes,
   /// Default: unspecified,
   Color? color;
-
-  /// CSS attribute "`counter-increment`"
-  ///
-  /// Inherited: no
-  /// Initial: none
-  Map<String, int?>? counterIncrement;
-
-  /// CSS attribute "`counter-reset`"
-  ///
-  /// Inherited: no
-  /// Initial: none
-  Map<String, int?>? counterReset;
 
   /// CSS attribute "`direction`"
   ///
@@ -57,12 +36,6 @@ class Style {
   /// Inherited: yes,
   /// Default: Theme.of(context).style.textTheme.body1.fontFamily
   String? fontFamily;
-
-  /// The list of font families to fall back on when a glyph cannot be found in default font family.
-  ///
-  /// Inherited: yes,
-  /// Default: null
-  List<String>? fontFamilyFallback;
 
   /// CSS attribute "`font-feature-settings`"
   ///
@@ -91,8 +64,8 @@ class Style {
   /// CSS attribute "`height`"
   ///
   /// Inherited: no,
-  /// Default: Height.auto(),
-  Height? height;
+  /// Default: Unspecified (null),
+  double? height;
 
   /// CSS attribute "`letter-spacing`"
   ///
@@ -100,16 +73,10 @@ class Style {
   /// Default: normal (0),
   double? letterSpacing;
 
-  /// CSS attribute "`list-style-image`"
-  ///
-  /// Inherited: yes,
-  /// Default: TODO
-  ListStyleImage? listStyleImage;
-
   /// CSS attribute "`list-style-type`"
   ///
   /// Inherited: yes,
-  /// Default: ListStyleType.disc
+  /// Default: ListStyleType.DISC
   ListStyleType? listStyleType;
 
   /// CSS attribute "`list-style-position`"
@@ -118,23 +85,17 @@ class Style {
   /// Default: ListStylePosition.OUTSIDE
   ListStylePosition? listStylePosition;
 
-  /// CSS pseudo-element "`::marker`"
+  /// CSS attribute "`padding`"
   ///
   /// Inherited: no,
-  /// Default: null
-  Marker? marker;
+  /// Default: EdgeInsets.zero
+  EdgeInsets? padding;
 
   /// CSS attribute "`margin`"
   ///
   /// Inherited: no,
-  /// Default: Margins.zero
-  Margins? margin;
-
-  /// CSS attribute "`padding`"
-  ///
-  /// Inherited: no,
-  /// Default: HtmlPaddings.zero
-  HtmlPaddings? padding;
+  /// Default: EdgeInsets.zero
+  EdgeInsets? margin;
 
   /// CSS attribute "`text-align`"
   ///
@@ -178,8 +139,8 @@ class Style {
   /// CSS attribute "`vertical-align`"
   ///
   /// Inherited: no,
-  /// Default: VerticalAlign.baseline,
-  VerticalAlign verticalAlign;
+  /// Default: VerticalAlign.BASELINE,
+  VerticalAlign? verticalAlign;
 
   /// CSS attribute "`white-space`"
   ///
@@ -190,8 +151,8 @@ class Style {
   /// CSS attribute "`width`"
   ///
   /// Inherited: no,
-  /// Default: Width.auto()
-  Width? width;
+  /// Default: unspecified (null)
+  double? width;
 
   /// CSS attribute "`word-spacing`"
   ///
@@ -214,6 +175,7 @@ class Style {
   String? after;
   Border? border;
   Alignment? alignment;
+  Widget? markerContent;
 
   /// MaxLine
   ///
@@ -232,14 +194,11 @@ class Style {
   TextTransform? textTransform;
 
   Style({
-    this.backgroundColor,
+    this.backgroundColor = Colors.transparent,
     this.color,
-    this.counterIncrement,
-    this.counterReset,
     this.direction,
     this.display,
     this.fontFamily,
-    this.fontFamilyFallback,
     this.fontFeatureSettings,
     this.fontSize,
     this.fontStyle,
@@ -247,11 +206,9 @@ class Style {
     this.height,
     this.lineHeight,
     this.letterSpacing,
-    this.listStyleImage,
     this.listStyleType,
     this.listStylePosition,
     this.padding,
-    this.marker,
     this.margin,
     this.textAlign,
     this.textDecoration,
@@ -259,7 +216,7 @@ class Style {
     this.textDecorationStyle,
     this.textDecorationThickness,
     this.textShadow,
-    this.verticalAlign = VerticalAlign.baseline,
+    this.verticalAlign,
     this.whiteSpace,
     this.width,
     this.wordSpacing,
@@ -267,13 +224,14 @@ class Style {
     this.after,
     this.border,
     this.alignment,
+    this.markerContent,
     this.maxLines,
     this.textOverflow,
     this.textTransform = TextTransform.none,
   }) {
-    if (alignment == null &&
-        (display == Display.block || display == Display.listItem)) {
-      alignment = Alignment.centerLeft;
+    if (this.alignment == null &&
+        (display == Display.BLOCK || display == Display.LIST_ITEM)) {
+      this.alignment = Alignment.centerLeft;
     }
   }
 
@@ -306,15 +264,16 @@ class Style {
       decorationStyle: textDecorationStyle,
       decorationThickness: textDecorationThickness,
       fontFamily: fontFamily,
-      fontFamilyFallback: fontFamilyFallback,
       fontFeatures: fontFeatureSettings,
-      fontSize: fontSize?.value,
+      fontSize: fontSize?.size,
       fontStyle: fontStyle,
       fontWeight: fontWeight,
       letterSpacing: letterSpacing,
       shadows: textShadow,
       wordSpacing: wordSpacing,
       height: lineHeight?.size ?? 1.0,
+      //TODO background
+      //TODO textBaseline
     );
   }
 
@@ -327,12 +286,9 @@ class Style {
     return copyWith(
       backgroundColor: other.backgroundColor,
       color: other.color,
-      counterIncrement: other.counterIncrement,
-      counterReset: other.counterReset,
       direction: other.direction,
       display: other.display,
       fontFamily: other.fontFamily,
-      fontFamilyFallback: other.fontFamilyFallback,
       fontFeatureSettings: other.fontFeatureSettings,
       fontSize: other.fontSize,
       fontStyle: other.fontStyle,
@@ -340,12 +296,12 @@ class Style {
       height: other.height,
       lineHeight: other.lineHeight,
       letterSpacing: other.letterSpacing,
-      listStyleImage: other.listStyleImage,
       listStyleType: other.listStyleType,
       listStylePosition: other.listStylePosition,
-      padding: padding?.merge(other.padding) ?? other.padding,
-      margin: margin?.merge(other.margin) ?? other.margin,
-      marker: other.marker,
+      padding: other.padding,
+      //TODO merge EdgeInsets
+      margin: other.margin,
+      //TODO merge EdgeInsets
       textAlign: other.textAlign,
       textDecoration: other.textDecoration,
       textDecorationColor: other.textDecorationColor,
@@ -356,10 +312,13 @@ class Style {
       whiteSpace: other.whiteSpace,
       width: other.width,
       wordSpacing: other.wordSpacing,
+
       before: other.before,
       after: other.after,
-      border: border?.merge(other.border) ?? other.border,
+      border: other.border,
+      //TODO merge border
       alignment: other.alignment,
+      markerContent: other.markerContent,
       maxLines: other.maxLines,
       textOverflow: other.textOverflow,
       textTransform: other.textTransform,
@@ -367,38 +326,40 @@ class Style {
   }
 
   Style copyOnlyInherited(Style child) {
-    FontSize? finalFontSize = FontSize.inherit(fontSize, child.fontSize);
-
+    FontSize? finalFontSize = child.fontSize != null
+        ? fontSize != null && child.fontSize?.units == "em"
+            ? FontSize(child.fontSize!.size! * fontSize!.size!)
+            : child.fontSize
+        : fontSize != null && fontSize!.size! < 0
+            ? FontSize.percent(100)
+            : fontSize;
     LineHeight? finalLineHeight = child.lineHeight != null
         ? child.lineHeight?.units == "length"
             ? LineHeight(child.lineHeight!.size! /
-                (finalFontSize == null ? 14 : finalFontSize.value) *
+                (finalFontSize == null ? 14 : finalFontSize.size!) *
                 1.2)
             : child.lineHeight
         : lineHeight;
-
     return child.copyWith(
       backgroundColor: child.backgroundColor != Colors.transparent
           ? child.backgroundColor
           : backgroundColor,
       color: child.color ?? color,
       direction: child.direction ?? direction,
-      display: display == Display.none ? display : child.display,
+      display: display == Display.NONE ? display : child.display,
       fontFamily: child.fontFamily ?? fontFamily,
-      fontFamilyFallback: child.fontFamilyFallback ?? fontFamilyFallback,
       fontFeatureSettings: child.fontFeatureSettings ?? fontFeatureSettings,
       fontSize: finalFontSize,
       fontStyle: child.fontStyle ?? fontStyle,
       fontWeight: child.fontWeight ?? fontWeight,
       lineHeight: finalLineHeight,
       letterSpacing: child.letterSpacing ?? letterSpacing,
-      listStyleImage: child.listStyleImage ?? listStyleImage,
       listStyleType: child.listStyleType ?? listStyleType,
       listStylePosition: child.listStylePosition ?? listStylePosition,
       textAlign: child.textAlign ?? textAlign,
       textDecoration: TextDecoration.combine([
         child.textDecoration ?? TextDecoration.none,
-        textDecoration ?? TextDecoration.none,
+        textDecoration ?? TextDecoration.none
       ]),
       textShadow: child.textShadow ?? textShadow,
       whiteSpace: child.whiteSpace ?? whiteSpace,
@@ -412,25 +373,20 @@ class Style {
   Style copyWith({
     Color? backgroundColor,
     Color? color,
-    Map<String, int?>? counterIncrement,
-    Map<String, int?>? counterReset,
     TextDirection? direction,
     Display? display,
     String? fontFamily,
-    List<String>? fontFamilyFallback,
     List<FontFeature>? fontFeatureSettings,
     FontSize? fontSize,
     FontStyle? fontStyle,
     FontWeight? fontWeight,
-    Height? height,
+    double? height,
     LineHeight? lineHeight,
     double? letterSpacing,
-    ListStyleImage? listStyleImage,
     ListStyleType? listStyleType,
     ListStylePosition? listStylePosition,
-    HtmlPaddings? padding,
-    Margins? margin,
-    Marker? marker,
+    EdgeInsets? padding,
+    EdgeInsets? margin,
     TextAlign? textAlign,
     TextDecoration? textDecoration,
     Color? textDecorationColor,
@@ -439,7 +395,7 @@ class Style {
     List<Shadow>? textShadow,
     VerticalAlign? verticalAlign,
     WhiteSpace? whiteSpace,
-    Width? width,
+    double? width,
     double? wordSpacing,
     String? before,
     String? after,
@@ -454,12 +410,9 @@ class Style {
     return Style(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       color: color ?? this.color,
-      counterIncrement: counterIncrement ?? this.counterIncrement,
-      counterReset: counterReset ?? this.counterReset,
       direction: direction ?? this.direction,
       display: display ?? this.display,
       fontFamily: fontFamily ?? this.fontFamily,
-      fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontFeatureSettings: fontFeatureSettings ?? this.fontFeatureSettings,
       fontSize: fontSize ?? this.fontSize,
       fontStyle: fontStyle ?? this.fontStyle,
@@ -467,12 +420,10 @@ class Style {
       height: height ?? this.height,
       lineHeight: lineHeight ?? this.lineHeight,
       letterSpacing: letterSpacing ?? this.letterSpacing,
-      listStyleImage: listStyleImage ?? this.listStyleImage,
       listStyleType: listStyleType ?? this.listStyleType,
       listStylePosition: listStylePosition ?? this.listStylePosition,
       padding: padding ?? this.padding,
       margin: margin ?? this.margin,
-      marker: marker ?? this.marker,
       textAlign: textAlign ?? this.textAlign,
       textDecoration: textDecoration ?? this.textDecoration,
       textDecorationColor: textDecorationColor ?? this.textDecorationColor,
@@ -488,195 +439,131 @@ class Style {
       after: beforeAfterNull == true ? null : after ?? this.after,
       border: border ?? this.border,
       alignment: alignment ?? this.alignment,
+      markerContent: markerContent ?? this.markerContent,
       maxLines: maxLines ?? this.maxLines,
       textOverflow: textOverflow ?? this.textOverflow,
       textTransform: textTransform ?? this.textTransform,
     );
   }
 
-  factory Style.fromTextStyle(TextStyle textStyle) {
-    return Style(
-      backgroundColor: textStyle.backgroundColor,
-      color: textStyle.color,
-      textDecoration: textStyle.decoration,
-      textDecorationColor: textStyle.decorationColor,
-      textDecorationStyle: textStyle.decorationStyle,
-      textDecorationThickness: textStyle.decorationThickness,
-      fontFamily: textStyle.fontFamily,
-      fontFamilyFallback: textStyle.fontFamilyFallback,
-      fontFeatureSettings: textStyle.fontFeatures,
-      fontSize:
-          textStyle.fontSize != null ? FontSize(textStyle.fontSize!) : null,
-      fontStyle: textStyle.fontStyle,
-      fontWeight: textStyle.fontWeight,
-      letterSpacing: textStyle.letterSpacing,
-      textShadow: textStyle.shadows,
-      wordSpacing: textStyle.wordSpacing,
-      lineHeight: LineHeight(textStyle.height ?? 1.2),
-    );
-  }
-
-  /// Sets any dimensions set to rem or em to the computed size
-  void setRelativeValues(double remValue, double emValue) {
-    final calculatedWidth = width?.calculateRelativeValue(remValue, emValue);
-    if (calculatedWidth != null) {
-      width = Width(calculatedWidth);
-    }
-
-    final calculatedHeight = height?.calculateRelativeValue(remValue, emValue);
-    if (calculatedHeight != null) {
-      height = Height(calculatedHeight);
-    }
-
-    final calculatedFontSize =
-        fontSize?.calculateRelativeValue(remValue, emValue);
-    if (calculatedFontSize != null) {
-      fontSize = FontSize(calculatedFontSize);
-    }
-
-    margin = margin?.copyWith(
-      left: margin?.left?.getRelativeValue(remValue, emValue),
-      top: margin?.top?.getRelativeValue(remValue, emValue),
-      right: margin?.right?.getRelativeValue(remValue, emValue),
-      bottom: margin?.bottom?.getRelativeValue(remValue, emValue),
-      inlineStart: margin?.inlineStart?.getRelativeValue(remValue, emValue),
-      inlineEnd: margin?.inlineEnd?.getRelativeValue(remValue, emValue),
-      blockStart: margin?.blockStart?.getRelativeValue(remValue, emValue),
-      blockEnd: margin?.blockEnd?.getRelativeValue(remValue, emValue),
-    );
-
-    padding = padding?.copyWith(
-      left: padding?.left?.getRelativeValue(remValue, emValue),
-      top: padding?.top?.getRelativeValue(remValue, emValue),
-      right: padding?.right?.getRelativeValue(remValue, emValue),
-      bottom: padding?.bottom?.getRelativeValue(remValue, emValue),
-      inlineStart: padding?.inlineStart?.getRelativeValue(remValue, emValue),
-      inlineEnd: padding?.inlineEnd?.getRelativeValue(remValue, emValue),
-      blockStart: padding?.blockStart?.getRelativeValue(remValue, emValue),
-      blockEnd: padding?.blockEnd?.getRelativeValue(remValue, emValue),
-    );
-  }
-}
-
-extension _MarginRelativeValues on Margin {
-  Margin? getRelativeValue(double remValue, double emValue) {
-    double? calculatedValue = calculateRelativeValue(remValue, emValue);
-    if (calculatedValue != null) {
-      return Margin(calculatedValue);
-    }
-
-    return null;
-  }
-}
-
-extension _PaddingRelativeValues on HtmlPadding {
-  HtmlPadding? getRelativeValue(double remValue, double emValue) {
-    double? calculatedValue = calculateRelativeValue(remValue, emValue);
-    if (calculatedValue != null) {
-      return HtmlPadding(calculatedValue);
-    }
-
-    return null;
-  }
-}
-
-extension MergeBorders on Border? {
-  Border? merge(Border? other) {
-    return Border(
-      top: other?.top ?? this?.top ?? BorderSide.none,
-      right: other?.right ?? this?.right ?? BorderSide.none,
-      bottom: other?.bottom ?? this?.bottom ?? BorderSide.none,
-      left: other?.left ?? this?.left ?? BorderSide.none,
-    );
+  Style.fromTextStyle(TextStyle textStyle) {
+    this.backgroundColor = textStyle.backgroundColor;
+    this.color = textStyle.color;
+    this.textDecoration = textStyle.decoration;
+    this.textDecorationColor = textStyle.decorationColor;
+    this.textDecorationStyle = textStyle.decorationStyle;
+    this.textDecorationThickness = textStyle.decorationThickness;
+    this.fontFamily = textStyle.fontFamily;
+    this.fontFeatureSettings = textStyle.fontFeatures;
+    this.fontSize = FontSize(textStyle.fontSize);
+    this.fontStyle = textStyle.fontStyle;
+    this.fontWeight = textStyle.fontWeight;
+    this.letterSpacing = textStyle.letterSpacing;
+    this.textShadow = textStyle.shadows;
+    this.wordSpacing = textStyle.wordSpacing;
+    this.lineHeight = LineHeight(textStyle.height ?? 1.2);
+    this.textTransform = TextTransform.none;
   }
 }
 
 enum Display {
-  block,
-  inline,
-  inlineBlock,
-  listItem,
-  none,
+  BLOCK,
+  INLINE,
+  INLINE_BLOCK,
+  LIST_ITEM,
+  NONE,
 }
 
-enum ListStyleType {
-  arabicIndic('arabic-indic'),
-  armenian('armenian'),
-  lowerArmenian('lower-armenian'),
-  upperArmenian('upper-armenian'),
-  bengali('bengali'),
-  cambodian('cambodian'),
-  khmer('khmer'),
-  circle('circle'),
-  cjkDecimal('cjk-decimal'),
-  cjkEarthlyBranch('cjk-earthly-branch'),
-  cjkHeavenlyStem('cjk-heavenly-stem'),
-  cjkIdeographic('cjk-ideographic'),
-  decimal('decimal'),
-  decimalLeadingZero('decimal-leading-zero'),
-  devanagari('devanagari'),
-  disc('disc'),
-  disclosureClosed('disclosure-closed'),
-  disclosureOpen('disclosure-open'),
-  ethiopicNumeric('ethiopic-numeric'),
-  georgian('georgian'),
-  gujarati('gujarati'),
-  gurmukhi('gurmukhi'),
-  hebrew('hebrew'),
-  hiragana('hiragana'),
-  hiraganaIroha('hiragana-iroha'),
-  japaneseFormal('japanese-formal'),
-  japaneseInformal('japanese-informal'),
-  kannada('kannada'),
-  katakana('katakana'),
-  katakanaIroha('katakana-iroha'),
-  koreanHangulFormal('korean-hangul-formal'),
-  koreanHanjaInformal('korean-hanja-informal'),
-  koreanHanjaFormal('korean-hanja-formal'),
-  lao('lao'),
-  lowerAlpha('lower-alpha'),
-  lowerGreek('lower-greek'),
-  lowerLatin('lower-latin'),
-  lowerRoman('lower-roman'),
-  malayalam('malayalam'),
-  mongolian('mongolian'),
-  myanmar('myanmar'),
-  none('none'),
-  oriya('oriya'),
-  persian('persian'),
-  simpChineseFormal('simp-chinese-formal'),
-  simpChineseInformal('simp-chinese-informal'),
-  square('square'),
-  tamil('tamil'),
-  telugu('telugu'),
-  thai('thai'),
-  tibetan('tibetan'),
-  tradChineseFormal('trad-chinese-formal'),
-  tradChineseInformal('trad-chinese-informal'),
-  upperAlpha('upper-alpha'),
-  upperLatin('upper-latin'),
-  upperRoman('upper-roman');
+class FontSize {
+  final double? size;
+  final String units;
 
-  final String counterStyle;
+  const FontSize(this.size, {this.units = ""});
 
-  const ListStyleType(this.counterStyle);
-
-  factory ListStyleType.fromName(String name) {
-    return ListStyleType.values.firstWhere((value) {
-      return name == value.counterStyle;
-    });
+  /// A percentage of the parent style's font size.
+  factory FontSize.percent(double percent) {
+    return FontSize(percent / -100.0, units: "%");
   }
+
+  factory FontSize.em(double? em) {
+    return FontSize(em, units: "em");
+  }
+
+  factory FontSize.rem(double rem) {
+    return FontSize(rem * 16 - 2, units: "rem");
+  }
+  // These values are calculated based off of the default (`medium`)
+  // being 14px.
+  //
+  // TODO(Sub6Resources): This seems to override Flutter's accessibility text scaling.
+  //
+  // Negative values are computed during parsing to be a percentage of
+  // the parent style's font size.
+  static const xxSmall = FontSize(7.875);
+  static const xSmall = FontSize(8.75);
+  static const small = FontSize(11.375);
+  static const medium = FontSize(14.0);
+  static const large = FontSize(15.75);
+  static const xLarge = FontSize(21.0);
+  static const xxLarge = FontSize(28.0);
+  static const smaller = FontSize(-0.83);
+  static const larger = FontSize(-1.2);
 }
 
-class ListStyleImage {
-  final String uriText;
+class LineHeight {
+  final double? size;
+  final String units;
 
-  const ListStyleImage(this.uriText);
+  const LineHeight(this.size, {this.units = ""});
+
+  factory LineHeight.percent(double percent) {
+    return LineHeight(percent / 100.0 * 1.2, units: "%");
+  }
+
+  factory LineHeight.em(double em) {
+    return LineHeight(em * 1.2, units: "em");
+  }
+
+  factory LineHeight.rem(double rem) {
+    return LineHeight(rem * 1.2, units: "rem");
+  }
+
+  factory LineHeight.number(double num) {
+    return LineHeight(num * 1.2, units: "number");
+  }
+
+  static const normal = LineHeight(1.2);
+}
+
+class ListStyleType {
+  final String text;
+  final String type;
+  final Widget? widget;
+
+  const ListStyleType(this.text, {this.type = "marker", this.widget});
+
+  factory ListStyleType.fromImage(String url) =>
+      ListStyleType(url, type: "image");
+
+  factory ListStyleType.fromWidget(Widget widget) =>
+      ListStyleType("", widget: widget, type: "widget");
+
+  static const LOWER_ALPHA = ListStyleType("LOWER_ALPHA");
+  static const UPPER_ALPHA = ListStyleType("UPPER_ALPHA");
+  static const LOWER_LATIN = ListStyleType("LOWER_LATIN");
+  static const UPPER_LATIN = ListStyleType("UPPER_LATIN");
+  static const CIRCLE = ListStyleType("CIRCLE");
+  static const DISC = ListStyleType("DISC");
+  static const DECIMAL = ListStyleType("DECIMAL");
+  static const LOWER_ROMAN = ListStyleType("LOWER_ROMAN");
+  static const UPPER_ROMAN = ListStyleType("UPPER_ROMAN");
+  static const SQUARE = ListStyleType("SQUARE");
+  static const NONE = ListStyleType("NONE");
 }
 
 enum ListStylePosition {
-  outside,
-  inside,
+  OUTSIDE,
+  INSIDE,
 }
 
 enum TextTransform {
@@ -687,15 +574,12 @@ enum TextTransform {
 }
 
 enum VerticalAlign {
-  baseline,
-  sub,
-  sup,
-  top,
-  bottom,
-  middle,
+  BASELINE,
+  SUB,
+  SUPER,
 }
 
 enum WhiteSpace {
-  normal,
-  pre,
+  NORMAL,
+  PRE,
 }

@@ -4,51 +4,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class IframeWidget extends StatelessWidget {
-  final NavigationDelegate? navigationDelegate;
-  final ExtensionContext extensionContext;
+CustomRender iframeRender({NavigationDelegate? navigationDelegate}) =>
+    CustomRender.widget(widget: (context, buildChildren) {
+      final sandboxMode = context.tree.element?.attributes["sandbox"];
+      final UniqueKey key = UniqueKey();
+      final givenWidth =
+          double.tryParse(context.tree.element?.attributes['width'] ?? "");
+      final givenHeight =
+          double.tryParse(context.tree.element?.attributes['height'] ?? "");
 
-  const IframeWidget({
-    Key? key,
-    required this.extensionContext,
-    this.navigationDelegate,
-  }) : super(key: key);
+      final WebViewController controller = WebViewController();
 
-  @override
-  Widget build(BuildContext context) {
-    final WebViewController controller = WebViewController();
+      controller
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..loadRequest(Uri.parse(context.tree.element?.attributes['src'] ?? ""))
+        ..setNavigationDelegate(navigationDelegate!);
 
-    final sandboxMode = extensionContext.attributes["sandbox"];
-    controller.setJavaScriptMode(
-        sandboxMode == null || sandboxMode == "allow-scripts"
-            ? JavaScriptMode.unrestricted
-            : JavaScriptMode.disabled);
-
-    if (navigationDelegate != null) {
-      controller.setNavigationDelegate(navigationDelegate!);
-    }
-
-    final UniqueKey key = UniqueKey();
-    final givenWidth =
-        double.tryParse(extensionContext.attributes['width'] ?? "");
-    final givenHeight =
-        double.tryParse(extensionContext.attributes['height'] ?? "");
-
-    return SizedBox(
-      width: givenWidth ?? (givenHeight ?? 150) * 2,
-      height: givenHeight ?? (givenWidth ?? 300) / 2,
-      child: CssBoxWidget(
-        style: extensionContext.styledElement!.style,
-        childIsReplaced: true,
-        child: WebViewWidget(
-          controller: controller
-            ..loadRequest(
-                Uri.tryParse(extensionContext.attributes['src'] ?? "") ??
-                    Uri()),
-          key: key,
-          gestureRecognizers: {Factory(() => VerticalDragGestureRecognizer())},
+      return Container(
+        width: givenWidth ?? (givenHeight ?? 150) * 2,
+        height: givenHeight ?? (givenWidth ?? 300) / 2,
+        child: ContainerSpan(
+          style: context.style,
+          newContext: context,
+          child: WebViewWidget(
+            key: key,
+            controller: controller,
+            gestureRecognizers: {
+              Factory<VerticalDragGestureRecognizer>(
+                  () => VerticalDragGestureRecognizer())
+            },
+          ),
         ),
-      ),
-    );
-  }
-}
+      );
+    });

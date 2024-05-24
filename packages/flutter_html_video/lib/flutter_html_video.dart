@@ -2,51 +2,30 @@ library flutter_html_video;
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:video_player/video_player.dart';
 import 'package:html/dom.dart' as dom;
-import 'dart:io';
-
-/// [VideoHtmlExtension] adds support for the <video> tag to the flutter_html
-/// library.
-class VideoHtmlExtension extends HtmlExtension {
-  final VideoControllerCallback? videoControllerCallback;
-
-  const VideoHtmlExtension({
-    this.videoControllerCallback,
-  });
-
-  @override
-  Set<String> get supportedTags => {"video"};
-
-  @override
-  InlineSpan build(ExtensionContext context) {
-    return WidgetSpan(
-        child: VideoWidget(
-      context: context,
-      callback: videoControllerCallback,
-    ));
-  }
-}
 
 typedef VideoControllerCallback = void Function(
     dom.Element?, ChewieController, VideoPlayerController);
 
-/// A VideoWidget for displaying within the HTML tree.
-class VideoWidget extends StatefulWidget {
-  final ExtensionContext context;
-  final VideoControllerCallback? callback;
-  final List<DeviceOrientation>? deviceOrientationsOnEnterFullScreen;
-  final List<DeviceOrientation> deviceOrientationsAfterFullScreen;
+CustomRender videoRender({VideoControllerCallback? onControllerCreated}) =>
+    CustomRender.widget(
+        widget: (context, buildChildren) =>
+            VideoWidget(context: context, callback: onControllerCreated));
 
-  const VideoWidget({
-    Key? key,
+CustomRenderMatcher videoMatcher() => (context) {
+      return context.tree.element?.localName == "video";
+    };
+
+class VideoWidget extends StatefulWidget {
+  final RenderContext context;
+  final VideoControllerCallback? callback;
+
+  VideoWidget({
     required this.context,
     this.callback,
-    this.deviceOrientationsOnEnterFullScreen,
-    this.deviceOrientationsAfterFullScreen = DeviceOrientation.values,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() => _VideoWidgetState();
@@ -60,33 +39,19 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   void initState() {
-    final attributes = widget.context.attributes;
-
+    final attributes = widget.context.tree.element?.attributes ?? {};
     final sources = <String?>[
       if (attributes['src'] != null) attributes['src'],
-      ...ReplacedElement.parseMediaSources(widget.context.node.children),
+      ...ReplacedElement.parseMediaSources(
+          widget.context.tree.element!.children),
     ];
-
     final givenWidth = double.tryParse(attributes['width'] ?? "");
     final givenHeight = double.tryParse(attributes['height'] ?? "");
-
     if (sources.isNotEmpty && sources.first != null) {
       _width = givenWidth ?? (givenHeight ?? 150) * 2;
       _height = givenHeight ?? (givenWidth ?? 300) / 2;
-      Uri sourceUri = Uri.parse(sources.first!);
-      switch (sourceUri.scheme) {
-        case 'asset':
-          _videoController = VideoPlayerController.asset(sourceUri.path);
-          break;
-        case 'file':
-          _videoController =
-              VideoPlayerController.file(File.fromUri(sourceUri));
-          break;
-        default:
-          _videoController =
-              VideoPlayerController.network(sourceUri.toString());
-          break;
-      }
+      _videoController =
+          VideoPlayerController.networkUrl(Uri.parse(sources.first!));
       _chewieController = ChewieController(
         videoPlayerController: _videoController!,
         placeholder:
@@ -99,16 +64,9 @@ class _VideoWidgetState extends State<VideoWidget> {
         autoInitialize: true,
         aspectRatio:
             _width == null || _height == null ? null : _width! / _height!,
-        deviceOrientationsOnEnterFullScreen:
-            widget.deviceOrientationsOnEnterFullScreen,
-        deviceOrientationsAfterFullScreen:
-            widget.deviceOrientationsAfterFullScreen,
       );
       widget.callback?.call(
-        widget.context.element,
-        _chewieController!,
-        _videoController!,
-      );
+          widget.context.tree.element, _chewieController!, _videoController!);
     }
     super.initState();
   }
@@ -123,14 +81,17 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   Widget build(BuildContext bContext) {
     if (_chewieController == null) {
-      return const SizedBox(height: 0, width: 0);
+      return Container(height: 0, width: 0);
     }
-
-    return AspectRatio(
-      aspectRatio: _width! / _height!,
+    final child = Container(
+      key: widget.context.key,
       child: Chewie(
         controller: _chewieController!,
       ),
+    );
+    return AspectRatio(
+      aspectRatio: _width! / _height!,
+      child: child,
     );
   }
 }
